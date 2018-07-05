@@ -1,0 +1,127 @@
+---
+stages:
+- name: Git and Build Stage
+  inputs:
+  - url: https://github.com/Requarks/wiki-ibm-cloud-foundry.git
+    type: git
+    dir_name: null
+    service: ${REPO}
+    branch: ${REPO_BRANCH}
+    # Cannot use two git in one build job
+  triggers:
+  - type: commit
+  jobs:
+  - name: Git and Build Job
+    type: builder
+    artifact_dir: ''
+    build_type: shell
+    script: |-
+      #!/bin/bash
+
+      echo "Check curl is installed"
+      curl -V | grep "curl"
+      echo ""
+
+      #echo "Debugging - Show _pipeline_script.sh"
+      #echo "$(cat _pipeline_script.sh)"
+
+      #echo "Debugging - echo current working directory"
+      #pwd
+
+      #echo "Debugging - echo all environment variables which should match https://console.bluemix.net/docs/services/ContinuousDelivery/pipeline_deploy_var.html#deliverypipeline_envprop"
+      #env
+
+      #echo "Debugging - list all files in current working directory"
+      #ls -lha
+
+- name: Deploy Stage
+  inputs:
+  - type: job
+    stage: Git and Build Stage
+    job: Git and Build Job
+  triggers:
+  - type: stage
+  properties:
+  - name: CF_APP_NAME
+    value: undefined
+    type: text
+  - name: APP_URL
+    value: undefined
+    type: text
+  jobs:
+  - name: Blue-Green Deploy Job
+    type: deployer
+#    deploy_permission: DEV_IN_SPACE
+    deploy_type: cf
+    target:
+      region_id: ${CF_REGION_ID}
+      organization: ${CF_ORGANIZATION}
+      space: ${CF_SPACE}
+      application: ${CF_APP}
+    script: |-
+      #!/bin/bash
+
+      # Create required services instantiation
+      cf create-service compose-for-mongodb Standard mongodb-service-instance
+
+
+      # Standard Deploy (instead of Blue-Green Deploy)
+      #cf push "${CF_APP}"
+      #cf push "${CF_APP}" -f manifest.yml
+
+
+      # Blue-Green Deploy for Production
+      blue-green_deploy() {
+
+      if ! [ cf app $CF_APP ]; then
+        cf push $CF_APP
+      else
+        OLD_CF_APP=${CF_APP}-OLD-$(date +"%s")
+        rollback() {
+          set +e
+          if cf app $OLD_CF_APP; then
+            cf logs $CF_APP --recent
+            cf delete $CF_APP -f
+            cf rename $OLD_CF_APP $CF_APP
+          fi
+          exit 1
+        }
+        set -e
+        trap rollback ERR
+        cf rename $CF_APP $OLD_CF_APP
+        cf push $CF_APP
+        cf delete $OLD_CF_APP -f
+      fi
+
+      }
+
+      # Execute deploy function
+      blue-green_deploy
+
+      # Alternative to deploy function, dependant on CF Space names
+      #if [ "$CF_SPACE" = "production" ]; then
+      #  set_env
+      #  blue-green_deploy
+      #else
+      #  echo "No matching conditions for Blue-Green Deploy to Test or Prod"
+      #  echo $CF_APP
+      #  echo "Above CF App name is defined in toolchain.yml or in pipeline.yml Deploy Job"
+      #fi
+
+      # Export app name and URL for use in later Pipeline jobs
+      #export CF_APP_NAME="$CF_APP"
+      #export APP_URL=http://$(cf app $CF_APP_NAME | grep -e urls: -e routes: | awk '{print $2}')
+
+
+      # View logs
+      # cf logs "${CF_APP}" --recent
+
+hooks:
+- enabled: false
+  label: null
+  ssl_enabled: false
+  url: https://devops-api.ng.bluemix.net/v1/messaging/webhook/publish
+
+
+# Edited from https://github.com/open-toolchain/default-toolchain/blob/master/.bluemix/pipeline.yml
+# Edited from https://github.com/open-toolchain/simple-toolchain/tree/master/.bluemix

@@ -1,0 +1,59 @@
+---
+#IBM Cloud Foundry extension to replace cf service creation during pipeline step before cf push
+#declared-services:
+#  compose-for-mongodb-service:
+#    label: compose-for-mongodb
+#    plan: Standard
+
+applications:
+- disk_quota: 512M
+  host: wikijs
+  name: wikijs
+#  domain: mybluemix.net
+  instances: 1
+  memory: 1024M
+  buildpack: https://github.com/cloudfoundry/nodejs-buildpack
+#  buildpack: sdk-for-nodejs
+
+  services:
+    - mongodb-service-instance
+
+  env:
+    #Reserved for Wiki.js use. Required as true to enable docker container runtime in Cloud Foundry
+    WIKI_JS_HEROKU: true
+
+    # --- Wiki.js administrator configurations to inject into wiki/config.yml ---
+    #Email to use during root administrator account creation (default password: admin123)
+    WIKI_ADMIN_EMAIL: marty@example.com
+    #A long and unique random string used to encrypt sessions
+    WIKI_SESSION_KEY: secret
+
+    # --- Wiki.js site configurations to inject into wiki/config.yml ---
+    #Title of your Wiki app
+    WIKI_TITLE: Wiki
+    #UI Language (en, es, fr, ko, ru, zh)
+    WIKI_LANG: en
+    #Is the wiki publicly accessible? (without login)
+    WIKI_IS_PUBLIC: false
+
+    # --- GIT configurations to inject into wiki/config.yml ---
+    #URL of the remote git repository eg. https://github.com/Organization/Repo
+    WIKI_GIT_URL: https://github.com/Organization/Repo
+    #Branch of the remote git repository to use. This branch must already exist.
+    WIKI_GIT_BRANCH: master
+    #Username to access the remote git repository
+    WIKI_GIT_USERNAME: username
+    #Password / PAT / Deploy Key to access the remote git repository
+    WIKI_GIT_PASSWORD: ghe_token
+    #Default email to use as commit author
+    WIKI_SERVER_EMAIL: marty@example.com
+    #Whether to use user email as author in commits
+    WIKI_SHOW_USER_EMAIL: true
+
+    # --- Critical configurations for wiki/config.yml, but are set in npm start script so it can dynamically use current Cloud Foundry environment details ---
+    #Full URL of your Wiki app (must be without the trailing slash) eg. https://YOURAPP.herokuapp.com
+    #WIKI_HOST: https://YOURAPP.herokuapp.com
+    #Database Connection String
+    #MONGODB_URI: mongodb://user:pass@host:port/dbname
+    #Port the main server should listen to (80 by default)
+    #PORT:
