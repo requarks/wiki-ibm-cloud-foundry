@@ -13,7 +13,7 @@ For information about Wiki.js, including detailed installation steps, read the f
 
 ## Automated deployment via IBM Cloud Continuous Delivery
 
-<a href="https://cloud.ibm.com/devops/setup/deploy?repository=https://github.com/seafre/wiki-ibm-cloud-foundry" rel="Deploy to IBM Cloud Foundry public"><img src="https://cloud.ibm.com/devops/setup/deploy/button.svg" alt="Deploy to IBM Cloud Foundry" width="250"/></a>
+<a href="https://cloud.ibm.com/devops/setup/deploy?repository=https://github.com/Requarks/wiki-ibm-cloud-foundry" rel="Deploy to IBM Cloud Foundry public"><img src="https://cloud.ibm.com/devops/setup/deploy/button.svg" alt="Deploy to IBM Cloud Foundry" width="250"/></a>
 
 ### Step-by-step guidance if required:
 1. Click Deploy to IBM Cloud, this imports the Open Toolchain deployment template into IBM Cloud Continuous Delivery.

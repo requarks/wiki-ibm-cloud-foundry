@@ -2,7 +2,7 @@
 stages:
 - name: Git and Build Stage
   inputs:
-  - url: https://github.com/seafre/wiki-ibm-cloud-foundry.git
+  - url: https://github.com/Requarks/wiki-ibm-cloud-foundry.git
     type: git
     dir_name: null
     service: ${REPO}

@@ -24,9 +24,9 @@ template:
     - wikijs-repo
   info:
     git url: >-
-      [wiki-ibm-cloud-foundry](https://github.com/seafre/wiki-ibm-cloud-foundry)
+      [wiki-ibm-cloud-foundry](https://github.com/Requarks/wiki-ibm-cloud-foundry)
     git branch: >-
-      [master](https://github.com/seafre/wiki-ibm-cloud-foundry/tree/master)
+      [master](https://github.com/Requarks/wiki-ibm-cloud-foundry/tree/master)
 
 
 # Open Toolchain Template form input
@@ -60,7 +60,7 @@ services:
     service_id: githubpublic
     parameters:
       repo_name: '{{form.pipeline.parameters.prod-app-name}}-repo'
-      repo_url: 'https://github.com/seafre/wiki-ibm-cloud-foundry'
+      repo_url: 'https://github.com/Requarks/wiki-ibm-cloud-foundry'
       # For type: link to work, you must be a collaborator of the repo with write access. Even if you are Admin of the owning org, must be collaborator. Workaround is to use type: clone to create repo in personal account
       type: clone
       has_issues: true
