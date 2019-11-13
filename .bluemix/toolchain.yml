@@ -8,6 +8,8 @@ version: '2'
 # Open Toolchain for IBM Cloud Delivery Pipeline service definition https://github.com/open-toolchain/sdk/wiki/services.md#pipeline
 # Open Toolchain for IBM Cloud Delivery Pipeline service YAML formatting - https://github.com/open-toolchain/sdk/wiki/Pipeline-YAML-Format
 
+
+# Open Toolchain Template definition
 messages:
   $i18n: locales.yml
 
@@ -22,40 +24,56 @@ template:
     - wikijs-repo
   info:
     git url: >-
-      [wiki-ibm-cloud-foundry](https://github.com/Requarks/wiki-ibm-cloud-foundry)
+      [wiki-ibm-cloud-foundry](https://github.com/seafre/wiki-ibm-cloud-foundry)
     git branch: >-
-      [master](https://github.com/Requarks/wiki-ibm-cloud-foundry/tree/master)
+      [master](https://github.com/seafre/wiki-ibm-cloud-foundry/tree/master)
 
 
+# Open Toolchain Template form input
+
+# All services that require parameters will have a default UI provided by the setup page on IBM Cloud.
+# Services can also have a custom UI by specifying and providing a 'forms' element in their declaration to override the UI
+# All overrides must contain the 'forms' element properties in format: service_id -- parameters, schema.
+# More information available at - https://github.com/open-toolchain/sdk/wiki/Template-Custom-UI
+form:
+  pipeline:
+    parameters:
+      prod-app-name: 'wikijs'
+      prod-db-name: 'db-psql'
+    schema:
+      $ref: deploy.json
+
+
+# Open Toolchain definition
 toolchain:
-  name: 'default-{{timestamp}}'
+  name: 'wikijs-toolchain'
   template:
     getting_started:
       $ref: "#/messages/template.gettingStarted"
 
 
-# The Services available for Open Toolchain are documented on this Wiki in the service catalog - https://github.com/open-toolchain/sdk/wiki/services.md
+# Open Toolchain Services - the Services available for Open Toolchain are documented on this Wiki in the service catalog - https://github.com/open-toolchain/sdk/wiki/services.md
 services:
 
+# Service 1 - GitHub service definition
   wikijs-repo:
     service_id: githubpublic
     parameters:
-      repo_name: 'github-{{toolchain.name}}'
-      repo_url: 'https://github.com/Requarks/wiki-ibm-cloud-foundry'
+      repo_name: '{{form.pipeline.parameters.prod-app-name}}-repo'
+      repo_url: 'https://github.com/seafre/wiki-ibm-cloud-foundry'
       # For type: link to work, you must be a collaborator of the repo with write access. Even if you are Admin of the owning org, must be collaborator. Workaround is to use type: clone to create repo in personal account
       type: clone
       has_issues: true
       enable_traceability: true
 
-
-# Delivery Pipeline service definition https://github.com/open-toolchain/sdk/wiki/services.md#pipeline
+# Service 2 - Delivery Pipeline service definition https://github.com/open-toolchain/sdk/wiki/services.md#pipeline
 # Must confirm to this format - https://github.com/open-toolchain/sdk/wiki/Pipeline-YAML-Format
   wikijs-cf-build:
     service_id: pipeline
     parameters:
       services:
         - wikijs-repo
-      name: '{{toolchain.name}}'
+      name: 'wikijs-pipeline'
       ui-pipeline: true
       configuration:
         content:
@@ -63,10 +81,12 @@ services:
         env:
           REPO: wikijs-repo
           REPO_BRANCH: 'master'
+          CF_DB_NAME: '{{form.pipeline.parameters.prod-db-name}}'
           CF_APP: '{{form.pipeline.parameters.prod-app-name}}'
           CF_APP_NAME: '{{form.pipeline.parameters.prod-app-name}}'
           CF_SPACE: '{{form.pipeline.parameters.prod-space}}'
           CF_ORGANIZATION: '{{form.pipeline.parameters.prod-organization}}'
+          CF_REGION: '{{form.pipeline.parameters.prod-region}}'
           CF_REGION_ID: '{{form.pipeline.parameters.prod-region}}'
           PROD_SPACE_NAME: '{{form.pipeline.parameters.prod-space}}'
           PROD_ORG_NAME: '{{form.pipeline.parameters.prod-organization}}'
@@ -76,16 +96,3 @@ services:
 # Web IDE Service
 #  webide:
 #    service_id: orion
-
-
-# All services that require parameters will have a default UI provided by the setup page on IBM Cloud.
-# Services can also have a custom UI by specifying and providing a 'forms' element in their declaration to override the UI
-# All overrides must contain the 'forms' element properties in format: service_id -- parameters, schema.
-# More information available at - https://github.com/open-toolchain/sdk/wiki/Template-Custom-UI
-
-form:
-  pipeline:
-    parameters:
-      prod-app-name: 'wikijs-cfapp'
-    schema:
-      $ref: deploy.json

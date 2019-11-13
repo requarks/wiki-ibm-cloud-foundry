@@ -1,25 +1,45 @@
 ---
-template.name: "Develop a Cloud Foundry app with GitHub.com"
-template.description: "With this toolchain, you can develop and deploy a Cloud Foundry application. By default, the toolchain uses a sample Node.js \"Hello World\" app, or you can link to your own GitHub repository. This toolchain is preconfigured for continuous delivery, source control, issue tracking, and online editing.\n\nThis toolchain uses tools that are part of the Continuous Delivery service. If an instance of that service isn't already in the selected organization, when you click **Create**, it is automatically added with the free [Lite](/catalog/services/continuous-delivery/) plan selected.\n\nTo get started, click **Create**.\n\nFor step-by-step instructions, follow the [tutorial](https://www.ibm.com/devops/method/tutorials/tutorial_toolchain_flow)."
-template.gettingStarted: "**Your toolchain is ready!**\n**Quick start:** Commit a change to the Git repo to trigger a new build and deployment. For step-by-step instructions, see the [tutorial](https://www.ibm.com/devops/method/tutorials/tutorial_toolchain_flow?task=2) for this toolchain."
-deploy.title: "Sample Deploy Stage"
-deploy.description: "sample toolchain"
-deploy.longDescription: "The Delivery Pipeline automates continuous deployment."
-deploy.appDescription: "The name of your Hello World app"
-deploy.appName: "App name"
-region: "Region"
-organization: "Organization"
-space: "Space"
-prodStage: "Production stage"
-headerSVG.issueTracker: "ISSUE TRACKER"
-headerSVG.gitHub1: "GitHub"
+#The format for creating a link with a URL and text is [link text](link url) with no spaces or characters between the two sets of brackets- []()
+
+# Metadata used as Deployment Page banner
+template.name: "Wiki.js deployment to IBM Cloud Foundry public"
+template.description: "With this toolchain, you can deploy Wiki.js to IBM Cloud Foundry public"
+
+# Metadata used on Deployment Page under "More tools"
+deploy.title: "Deployment variables"
+deploy.description: "Deployment variables"
+deploy.longDescription: "The below variables are used for creation of the Toolchain and Delivery Pipeline to automate deployment"
+
+deploy.appName: "Application Name"
+deploy.appNameDescription: "Application Name to be deployed to IBM Cloud Foundry public"
+
+deploy.dbName: "PostgreSQL Database Name"
+deploy.dbNameDescription: "PostgreSQL Database Name to be deployed to IBM Cloud Foundry public"
+
+deploy.apiKeyTitle: "IBM Cloud API key"
+deploy.apiKeyDescription: "An API key is required to access IBM Cloud Foundry public. If you do not have one, you can click the Create button. You can also obtain an API key with 'ibmcloud iam api-key-create' or via the console at https://cloud.ibm.com/iam#/apikeys"
+
+deploy.prodStage: "Production Stage"
+deploy.region: "Cloud Foundry Region"
+deploy.organization: "Cloud Foundry Organization"
+deploy.space: "Cloud Foundry Space"
+
+# After click Create, show message on Toolchain overview page
+template.gettingStarted: "**Your toolchain is ready!**\n\n\n**To trigger the Delivery Pipeline:** Commit a change to the Git repo, this will trigger a new build and deployment."
+
+# Other metadata
 headerSVG.think: "THINK"
 headerSVG.code: "CODE"
 headerSVG.deliver: "DELIVER"
 headerSVG.run: "RUN"
+headerSVG.learn: "LEARN"
 headerSVG.repository: "REPOSITORY"
+headerSVG.gitHub1: "GitHub"
 headerSVG.gitHub2: "GitHub"
 headerSVG.pipeline: "PIPELINE"
-headerSVG.bluemix: "BLUEMIX"
+headerSVG.bluemix: "IBM Cloud Foundry public"
 headerSVG.ibmCloud: "IBM Cloud"
 headerSVG.webIde: "WEB IDE"
+headerSVG.devops: "DEVOPS"
+headerSVG.insights: "INSIGHTS"
+headerSVG.issueTracker: "ISSUE TRACKER"

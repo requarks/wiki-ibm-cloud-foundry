@@ -1,28 +1,33 @@
 {
   "name": "wiki-ibm-cloud-foundry",
-  "version": "1.0.5",
-  "description": "An open source, modern and powerful wiki app built on Node.js, Git and Markdown.",
+  "version": "2.0.0",
+  "description": "Deployment to IBM Cloud Foundry public of an open source, modern and powerful wiki app built on Node.js, Git and Markdown.",
   "main": "index.js",
   "scripts": {
-    "test": "exit 1",
     "postinstall": "chmod +x install.sh && bash ./install.sh",
-    "debugging": "env | grep '.*VCAP.*'",
-    "start": "export MONGODB_URI=$(echo $VCAP_SERVICES | jq '.mongodb[].credentials.uri' | sed -e 's/^\"//' -e 's/\"$//') && export WIKI_HOST_TMP1='https://' && export WIKI_HOST_TMP2=$(echo $VCAP_APPLICATION | jq '.application_uris[]' | sed -e 's/^\"//' -e 's/\"$//') && export WIKI_HOST=$WIKI_HOST_TMP1$WIKI_HOST_TMP2 && echo $WIKI_HOST && cd wiki && node server"
+    "start": "cd wiki && node server"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Requarks/wiki-heroku.git"
+    "url": "git+https://github.com/seafre/wiki-ibm-cloud-foundry.git"
   },
   "keywords": [
-    "wiki.js"
+    "wiki.js",
+    "wiki",
+    "wikis",
+    "docs",
+    "documentation",
+    "markdown",
+    "guides",
+    "knowledge base"
   ],
-  "author": "Nicolas Giard",
+  "author": "Nicolas Giard, Sean Freeman",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/Requarks/wiki-heroku/issues"
+    "url": "https://github.com/seafre/wiki-ibm-cloud-foundry/issues"
   },
-  "homepage": "https://github.com/Requarks/wiki-heroku#readme",
+  "homepage": "https://github.com/seafre/wiki-ibm-cloud-foundry#readme",
   "engines": {
-    "node": "*"
+    "node": ">=10.12"
   }
 }
