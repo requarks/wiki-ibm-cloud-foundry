@@ -9,7 +9,8 @@ stages:
     branch: ${REPO_BRANCH}
     # Cannot use two git in one build job
   triggers:
-  - type: commit
+  - type: git
+    events: '{"push":true,"pull_request":false,"pull_request_closed":false}'
   jobs:
   - name: Git and Build Job
     type: builder
@@ -42,16 +43,18 @@ stages:
   triggers:
   - type: stage
   properties:
-  - name: CF_APP_NAME
-    value: undefined
+  - name: CF_DB_NAME
+    value: ${CF_DB_NAME}
     type: text
-  - name: APP_URL
-    value: undefined
+  - name: CF_APP_NAME
+    value: ${CF_APP_NAME}
+    type: text
+  - name: CF_REGION
+    value: ${CF_REGION}
     type: text
   jobs:
   - name: Blue-Green Deploy Job
     type: deployer
-#    deploy_permission: DEV_IN_SPACE
     deploy_type: cf
     target:
       region_id: ${CF_REGION_ID}
@@ -61,20 +64,42 @@ stages:
     script: |-
       #!/bin/bash
 
-      # Create required services instantiation
-      cf create-service compose-for-mongodb Standard mongodb-service-instance
+      #echo "Create required services instantiation (MongoDB for Wikijs 1.x)"
+      #cf create-service compose-for-mongodb Standard mongodb-service-instance
 
+      echo "Create required services instantiation (new PostgreSQL service named "$CF_DB_NAME" for Wikijs 2.x)"
+      cf create-service databases-for-postgresql standard $CF_DB_NAME
+
+      echo "Check if PostgreSQL has been created (this can take 5-15mins for production-ready PostgreSQL DB)"
+      provision_start=$(date +%s)
+      while [ "$(cf services | grep $CF_DB_NAME | grep succeeded)" == "" ]; do
+        echo "Waiting 120 seconds"
+        sleep 120
+      done
+      provision_end=$(date +%s)
+      provision=$((((provision_end-provision_start))/60))
+      echo ""
+      echo "PostgreSQL took $provision minutes to provision"
+
+      echo "Amend Cloud Foundry manifest variables injection"
+      CF_REGION="${CF_REGION##*:}"
+      sed -i "s/cf_manual_app_name:.*/cf_manual_app_name: $CF_APP_NAME/g" ./manifest-vars.yml
+      sed -i "s/cf_manual_region:.*/cf_manual_region: $CF_REGION/g" ./manifest-vars.yml
+      sed -i "s/cf_manual_db_service_name:.*/cf_manual_db_service_name: $CF_DB_NAME/g" ./manifest-vars.yml
 
       # Standard Deploy (instead of Blue-Green Deploy)
       #cf push "${CF_APP}"
       #cf push "${CF_APP}" -f manifest.yml
+      #cf push "${CF_APP}" --vars-file=manifest-vars.yml
+      #cf push "${CF_APP}" -f manifest.yml --vars-file=manifest-vars.yml
 
 
-      # Blue-Green Deploy for Production
+      # Shell Function of Blue-Green Deploy for Production
       blue-green_deploy() {
 
       if ! [ cf app $CF_APP ]; then
-        cf push $CF_APP
+        echo "First-time build"
+        cf push $CF_APP --vars-file=manifest-vars.yml
       else
         OLD_CF_APP=${CF_APP}-OLD-$(date +"%s")
         rollback() {
@@ -89,7 +114,7 @@ stages:
         set -e
         trap rollback ERR
         cf rename $CF_APP $OLD_CF_APP
-        cf push $CF_APP
+        cf push $CF_APP --vars-file=manifest-vars.yml
         cf delete $OLD_CF_APP -f
       fi
 
@@ -120,7 +145,7 @@ hooks:
 - enabled: false
   label: null
   ssl_enabled: false
-  url: https://devops-api.ng.bluemix.net/v1/messaging/webhook/publish
+  url: https://devops-api.us-south.devops.cloud.ibm.com/v1/messaging/webhook/publish
 
 
 # Edited from https://github.com/open-toolchain/default-toolchain/blob/master/.bluemix/pipeline.yml
