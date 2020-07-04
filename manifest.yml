@@ -1,9 +1,9 @@
 ---
 
 applications:
-- name: ((cf_manual_app_name))-cf
-  memory: 1024M
-  disk_quota: 512M
+- name: ((cf_manual_app_name))
+  memory: 768M
+  disk_quota: 1024M
   instances: 1
   stack: cflinuxfs3
 
@@ -12,8 +12,8 @@ applications:
 
   # Shown using IBM Cloud CLI (ibmcloud cf domains)
   routes:
-    - route: ((cf_manual_app_name))-cf.((cf_manual_region)).cf.appdomain.cloud
-    - route: ((cf_manual_app_name))-cf.apps.internal
+    - route: ((cf_manual_app_name)).((cf_manual_region)).cf.appdomain.cloud
+    - route: ((cf_manual_app_name)).apps.internal
 
   buildpacks:
     - https://github.com/cloudfoundry/nodejs-buildpack

@@ -1,4 +1,4 @@
 # Manual envronment variables which always require input, used in Cloud Foundry manifest.yml
-cf_manual_app_name: wikijs
+cf_manual_app_name: wikijs-cf
 cf_manual_region: us-south
 cf_manual_db_service_name: db-psql

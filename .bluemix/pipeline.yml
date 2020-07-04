@@ -19,9 +19,25 @@ stages:
     script: |-
       #!/bin/bash
 
-      echo "Check curl is installed"
-      curl -V | grep "curl"
-      echo ""
+      echo "#### The 'pipeline' user is permitted sudo to apt-get and dpkg, see https://cloud.ibm.com/docs/ContinuousDelivery?topic=ContinuousDelivery-deliverypipeline_about#deliverypipeline_jobs ####"
+      echo "This IBM Cloud Continuous Delivery pipeline execution uses a sudo call"
+
+      #echo "Check root in Docker container, non-root users are 1000 and above"
+      #id -u
+      #whoami
+      #echo ""
+
+      #echo "Check OS is Ubuntu 14 LTS"
+      #cat /etc/os-release | grep "PRETTY_NAME"
+      #echo ""
+
+      #echo "Check dpkg is installed"
+      #dpkg --version | grep "dpkg"
+      #echo ""
+
+      #echo "Check curl is installed"
+      #curl -V | grep "curl"
+      #echo ""
 
       #echo "Debugging - Show _pipeline_script.sh"
       #echo "$(cat _pipeline_script.sh)"
@@ -68,7 +84,10 @@ stages:
       #cf create-service compose-for-mongodb Standard mongodb-service-instance
 
       echo "Create required services instantiation (new PostgreSQL service named "$CF_DB_NAME" for Wikijs 2.x)"
-      cf create-service databases-for-postgresql standard $CF_DB_NAME
+      # https://cloud.ibm.com/docs/cli?topic=cloud-cli-ibmcloud_commands_resource#ibmcloud_resource_service_instance_create
+      # service-endpoints parameter which can have values of 'public', 'private', 'public-and-private'
+      # Using private endpoint only does not work, results in CF App to DB connection error "ERR Failed to make TCP connection to port 8080: connection refused"
+      cf create-service databases-for-postgresql standard $CF_DB_NAME -c '{"service-endpoints":"public-and-private"}'
 
       echo "Check if PostgreSQL has been created (this can take 5-15mins for production-ready PostgreSQL DB)"
       provision_start=$(date +%s)
@@ -94,10 +113,54 @@ stages:
       #cf push "${CF_APP}" -f manifest.yml --vars-file=manifest-vars.yml
 
 
+      echo "-> Fetching latest Pandoc version..."
+      PANDOC_LATEST_VERSION=$(
+      curl -s https://api.github.com/repos/jgm/pandoc/releases/latest \
+      | grep "tag_name" \
+      | cut -d ":" -f 2,3 \
+      | tr -d \" \
+      | tr -d , \
+      | tr -d " " \
+      )
+      echo "Pandoc version is $PANDOC_LATEST_VERSION"
+
+      echo "-> Fetching latest Pandoc version build release..."
+      # Use cURL follow re-direct and retain re-direct filename
+      # Leveraging the lessons learnt from Gist here - https://gist.github.com/steinwaywhw/a4cd19cda655b8249d908261a62687f8
+
+      # DO NOT USE auto-generated GitHub tarball_url or zipball_url, which is a snapshot of the GitHub repository sourec code at time of Release
+      # Instead use the Release's published/packaged "assets" using browser_download_url, and removing the url for the Windows release
+      PANDOC_LATEST_DL_URL=$(curl -s https://api.github.com/repos/jgm/pandoc/releases/latest \
+      | grep "browser_download_url.*" \
+      | grep ".*.deb.*" \
+      | cut -d ":" -f 2,3 \
+      | tr -d \" \
+      | tr -d , \
+      | tr -d " " \
+      )
+
+      curl -s -O -J -L $PANDOC_LATEST_DL_URL
+      PANDOC_LATEST_DL_FILE=$(find . -type f -iname '*pandoc*.deb' -print)
+      echo "Downloaded file is $PANDOC_LATEST_DL_FILE from $PANDOC_LATEST_DL_URL"
+
+      echo "Installing Pandoc..."
+      sudo dpkg -i $PANDOC_LATEST_DL_FILE
+      #dpkg -i $PANDOC_LATEST_DL_FILE
+
+      echo "Removing Pandoc .deb file"
+      rm $PANDOC_LATEST_DL_FILE
+      echo "---"
+
+      echo "For Pandoc PDF output, install LaTeX distribution TeX Live"
+      sudo apt-get --assume-yes install texlive
+      # apt-get --assume-yes install texlive
+
+
       # Shell Function of Blue-Green Deploy for Production
       blue-green_deploy() {
 
-      if ! [ cf app $CF_APP ]; then
+      # https://stackoverflow.com/questions/13781216/meaning-of-too-many-arguments-error-from-if-square-brackets
+      if ! cf app $CF_APP; then
         echo "First-time build"
         cf push $CF_APP --vars-file=manifest-vars.yml
       else
@@ -111,6 +174,7 @@ stages:
           fi
           exit 1
         }
+        echo "Blue-Green Deploy"
         set -e
         trap rollback ERR
         cf rename $CF_APP $OLD_CF_APP
