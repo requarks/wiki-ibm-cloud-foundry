@@ -38,7 +38,7 @@ template:
 form:
   pipeline:
     parameters:
-      prod-app-name: 'wikijs'
+      prod-app-name: 'wikijs-cf'
       prod-db-name: 'db-psql'
     schema:
       $ref: deploy.json

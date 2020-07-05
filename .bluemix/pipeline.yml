@@ -129,7 +129,7 @@ stages:
       # Leveraging the lessons learnt from Gist here - https://gist.github.com/steinwaywhw/a4cd19cda655b8249d908261a62687f8
 
       # DO NOT USE auto-generated GitHub tarball_url or zipball_url, which is a snapshot of the GitHub repository sourec code at time of Release
-      # Instead use the Release's published/packaged "assets" using browser_download_url, and removing the url for the Windows release
+      # Instead use the Release's published/packaged "assets" using browser_download_url
       PANDOC_LATEST_DL_URL=$(curl -s https://api.github.com/repos/jgm/pandoc/releases/latest \
       | grep "browser_download_url.*" \
       | grep ".*.deb.*" \
@@ -149,11 +149,6 @@ stages:
 
       echo "Removing Pandoc .deb file"
       rm $PANDOC_LATEST_DL_FILE
-      echo "---"
-
-      echo "For Pandoc PDF output, install LaTeX distribution TeX Live"
-      sudo apt-get --assume-yes install texlive
-      # apt-get --assume-yes install texlive
 
 
       # Shell Function of Blue-Green Deploy for Production
