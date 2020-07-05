@@ -57,6 +57,7 @@ db:
 
 
 
+
 #######################################################################
 # ADVANCED OPTIONS                                                    #
 #######################################################################
@@ -88,6 +89,7 @@ ssl:
 
 # Custom certificate
   provider: custom
+
   # Certificate format, either 'pem' or 'pfx':
   format: pem
   # Using PEM format:
@@ -131,6 +133,7 @@ bindIP: 0.0.0.0
 
 logLevel: info
 
+
 # ---------------------------------------------------------------------
 # Upload Limits (deprecated after 2.2, retained for reference)
 # ---------------------------------------------------------------------
@@ -142,6 +145,7 @@ uploads:
   maxFileSize: 5242880
   # Maximum file uploads per request (default: 20)
   maxFiles: 10
+
 
 # ---------------------------------------------------------------------
 # Offline Mode
@@ -171,3 +175,4 @@ ha: false
 # setting the dataPath parameter
 
 #dataPath: /path/to/directory
+

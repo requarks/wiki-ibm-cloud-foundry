@@ -49,9 +49,11 @@ curl -s https://api.github.com/repos/Requarks/wiki/releases/latest \
 | tr -d , \
 | tr -d " " \
 )
+
 echo "Wiki.js version is $WIKIJS_LATEST_VERSION"
 
 echo "-> Fetching latest Wiki.js version build release..."
+
 # Use cURL follow re-direct and retain re-direct filename
 # Leveraging the lessons learnt from Gist here - https://gist.github.com/steinwaywhw/a4cd19cda655b8249d908261a62687f8
 
@@ -175,7 +177,6 @@ cf_url2=$(echo $cf_auto_env_app_uris | awk '{print $2}')
 echo "Starting on URLs:"
 echo "https://$cf_url1"
 echo "https://$cf_url2"
-
 echo "============================="
 
 

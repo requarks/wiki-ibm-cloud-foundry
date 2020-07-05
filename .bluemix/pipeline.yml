@@ -84,10 +84,12 @@ stages:
       #cf create-service compose-for-mongodb Standard mongodb-service-instance
 
       echo "Create required services instantiation (new PostgreSQL service named "$CF_DB_NAME" for Wikijs 2.x)"
+
       # https://cloud.ibm.com/docs/cli?topic=cloud-cli-ibmcloud_commands_resource#ibmcloud_resource_service_instance_create
       # service-endpoints parameter which can have values of 'public', 'private', 'public-and-private'
       # Using private endpoint only does not work, results in CF App to DB connection error "ERR Failed to make TCP connection to port 8080: connection refused"
       cf create-service databases-for-postgresql standard $CF_DB_NAME -c '{"service-endpoints":"public-and-private"}'
+
 
       echo "Check if PostgreSQL has been created (this can take 5-15mins for production-ready PostgreSQL DB)"
       provision_start=$(date +%s)
