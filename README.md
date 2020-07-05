@@ -7,7 +7,7 @@ This deployment assumes you have an [IBM Cloud account](https://cloud.ibm.com/re
 For information about Wiki.js, including detailed installation steps, read the following links:
 
 - [Official Website](https://wiki.js.org/)
-- [Installation Guide](https://wiki.js.org/get-started.html)
+- [Installation Guide](https://wiki.js.org/get-started)
 - [GitHub Repository](https://github.com/Requarks/wiki)
 
 
