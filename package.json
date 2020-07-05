@@ -1,6 +1,6 @@
 {
   "name": "wiki-ibm-cloud-foundry",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Deployment to IBM Cloud Foundry public of an open source, modern and powerful wiki app built on Node.js, Git and Markdown.",
   "main": "index.js",
   "scripts": {
@@ -28,6 +28,6 @@
   },
   "homepage": "https://github.com/Requarks/wiki-ibm-cloud-foundry#readme",
   "engines": {
-    "node": ">=10.12"
+    "node": ">=12.18.0 <13.0.0"
   }
 }

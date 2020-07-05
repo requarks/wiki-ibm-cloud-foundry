@@ -27,7 +27,6 @@ port:
 # - sqlite = SQLite 3.9 or later
 
 db:
-  ssl: true
   type: postgres
 
   # PostgreSQL / MySQL / MariaDB / MS SQL Server...
@@ -36,6 +35,26 @@ db:
   user:
   pass:
   db:
+
+  # In most scenarios, the SSL connection can be automatically established
+  # by the database client driver.
+  ssl: true
+
+  # If your server requires a specific or self-generated certificate,
+  # you can specify the custom TLS options
+  # Node.js TLS documentation has the complete list of accepted parameters for the sslOptions object:
+  # https://nodejs.org/api/tls.html#tls_tls_createsecurecontext_options
+  sslOptions:
+  # To use custom SSL settings, the auto flag must be set to false
+    auto: false
+  # Workaround to error SELF_SIGNED_CERT_IN_CHAIN from pg 8.x described on https://github.com/brianc/node-postgres/issues/2009
+    rejectUnauthorized: false
+  #  ca: path/to/ca.crt
+  #  cert: path/to/cert.crt
+  #  key: path/to/key.pem
+  #  pfx: path/to/cert.pfx
+  #  passphrase: xyz123
+
 
 
 
@@ -53,13 +72,23 @@ db:
 trustProxy: false
 
 # ---------------------------------------------------------------------
-# SSL/TLS Settings
+# HTTPS SSL/TLS Settings
 # ---------------------------------------------------------------------
 # Consider using a reverse proxy (e.g. nginx) if you require more
 # advanced options than those provided below.
 
 ssl:
   enabled: false
+
+  port: 3443
+
+# Lets Encrypt! certificate
+  #provider: letsencrypt
+  #domain: wiki.yourdomain.com
+  #subscriberEmail: admin@example.com
+
+# Custom certificate
+  provider: custom
 
   # Certificate format, either 'pem' or 'pfx':
   format: pem
@@ -79,8 +108,9 @@ ssl:
   redirectNonSSLPort: 80
 
 # ---------------------------------------------------------------------
-# Database Pool Options
+# App to Database Connection Pool Options
 # ---------------------------------------------------------------------
+# Wiki.js uses a pool of connections to the database to efficiently manage requests.
 # Refer to https://github.com/vincit/tarn.js for all possible options
 
 pool:
@@ -90,7 +120,9 @@ pool:
 # ---------------------------------------------------------------------
 # IP address the server should listen to
 # ---------------------------------------------------------------------
-# Leave 0.0.0.0 for all interfaces
+# If you have multiple ethernet interfaces and would like to
+# specify which IP should be used for listening.
+# Leave the default 0.0.0.0 to listen on all interfaces
 
 bindIP: 0.0.0.0
 
@@ -101,8 +133,9 @@ bindIP: 0.0.0.0
 
 logLevel: info
 
+
 # ---------------------------------------------------------------------
-# Upload Limits
+# Upload Limits (deprecated after 2.2, retained for reference)
 # ---------------------------------------------------------------------
 # If you're using a reverse-proxy in front of Wiki.js, you must also
 # change your proxy upload limits!
@@ -113,6 +146,7 @@ uploads:
   # Maximum file uploads per request (default: 20)
   maxFiles: 10
 
+
 # ---------------------------------------------------------------------
 # Offline Mode
 # ---------------------------------------------------------------------
@@ -120,3 +154,25 @@ uploads:
 # download the offline files for sideloading.
 
 offline: false
+
+
+# ---------------------------------------------------------------------
+# High-Availability
+# ---------------------------------------------------------------------
+# PostgreSQL is required to enable this option.
+# Set to true if you have multiple concurrent instances running off the
+# same DB (e.g. Kubernetes pods / load balanced instances)
+
+ha: false
+
+
+# ---------------------------------------------------------------------
+# Data Paths
+# ---------------------------------------------------------------------
+# Wiki.js needs a folder to write temporary data.
+# By default, this path is ./data which is relative to the wiki installation.
+# If write access cannot be given to this path, you can change it by
+# setting the dataPath parameter
+
+#dataPath: /path/to/directory
+

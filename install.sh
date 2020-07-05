@@ -28,7 +28,7 @@ wget --version | grep "GNU Wget"
 # Documented here, but this is held under .bluemix folder
 # See documentation: https://cloud.ibm.com/docs/services/ContinuousDelivery?topic=ContinuousDelivery-deliverypipeline_about#deliverypipeline_jobs
 #echo "-> Installing necessary OS Packages"
-#sudo apt-get install -y yarn g++ make python curl git openssh gnupg
+#sudo apt-get --assume-yes install -y yarn g++ make python curl git openssh gnupg
 
 
 echo "============================="
@@ -40,7 +40,7 @@ mkdir -p wiki
 mkdir -p logs
 #chown -R node:node ./wiki ./logs
 
-echo "-> Fetching latest version..."
+echo "-> Fetching latest Wiki.js version..."
 WIKIJS_LATEST_VERSION=$(
 curl -s https://api.github.com/repos/Requarks/wiki/releases/latest \
 | grep "tag_name" \
@@ -49,9 +49,11 @@ curl -s https://api.github.com/repos/Requarks/wiki/releases/latest \
 | tr -d , \
 | tr -d " " \
 )
-echo "Version is $WIKIJS_LATEST_VERSION"
 
-echo "-> Fetching latest version build release..."
+echo "Wiki.js version is $WIKIJS_LATEST_VERSION"
+
+echo "-> Fetching latest Wiki.js version build release..."
+
 # Use cURL follow re-direct and retain re-direct filename
 # Leveraging the lessons learnt from Gist here - https://gist.github.com/steinwaywhw/a4cd19cda655b8249d908261a62687f8
 
@@ -79,6 +81,55 @@ echo "Extracted to $PWD/wiki"
 echo "Removed file $WIKIJS_LATEST_DL_FILE"
 
 # tar on macOS would not work with above, as this requires filename after operators
+
+function pandoc_install()
+{
+echo "-> Fetching latest Pandoc version..."
+PANDOC_LATEST_VERSION=$(
+curl -s https://api.github.com/repos/jgm/pandoc/releases/latest \
+| grep "tag_name" \
+| cut -d ":" -f 2,3 \
+| tr -d \" \
+| tr -d , \
+| tr -d " " \
+)
+echo "Pandoc version is $PANDOC_LATEST_VERSION"
+
+echo "-> Fetching latest Pandoc version build release..."
+# Use cURL follow re-direct and retain re-direct filename
+# Leveraging the lessons learnt from Gist here - https://gist.github.com/steinwaywhw/a4cd19cda655b8249d908261a62687f8
+
+# DO NOT USE auto-generated GitHub tarball_url or zipball_url, which is a snapshot of the GitHub repository sourec code at time of Release
+# Instead use the Release's published/packaged "assets" using browser_download_url, and removing the url for the Windows release
+PANDOC_LATEST_DL_URL=$(curl -s https://api.github.com/repos/jgm/pandoc/releases/latest \
+| grep "browser_download_url.*" \
+| grep ".*.deb.*" \
+| cut -d ":" -f 2,3 \
+| tr -d \" \
+| tr -d , \
+| tr -d " " \
+)
+
+curl -s -O -J -L $PANDOC_LATEST_DL_URL
+PANDOC_LATEST_DL_FILE=$(find . -type f -iname '*pandoc*.deb' -print)
+echo "Downloaded file is $PANDOC_LATEST_DL_FILE from $PANDOC_LATEST_DL_URL"
+
+echo "Installing Pandoc..."
+#sudo dpkg -i $PANDOC_LATEST_DL_FILE
+dpkg -i $PANDOC_LATEST_DL_FILE
+
+echo "Removing Pandoc .deb file"
+rm $PANDOC_LATEST_DL_FILE
+echo "---"
+
+echo "For Pandoc PDF output, install LaTeX distribution TeX Live"
+#sudo apt-get --assume-yes install texlive
+apt-get --assume-yes install texlive
+}
+
+# Described here for re-use by others as a standalone install script,
+# but this is executed by IBM Cloud Continuous Delivery pipeline where sudo privileges are available for dpkg
+#pandoc_install
 
 
 echo "============================="
@@ -121,8 +172,11 @@ npm install
 echo "============================="
 echo "Completed downloading and preparing CF App of Wiki.js version $WIKIJS_LATEST_VERSION, beginning npm start (i.e. node server)"
 echo ""
-cf_public_url=$(echo $cf_auto_env_app_uris | awk '{print $1}')
-echo "Starting on Public URL https://$cf_public_url"
+cf_url1=$(echo $cf_auto_env_app_uris | awk '{print $1}')
+cf_url2=$(echo $cf_auto_env_app_uris | awk '{print $2}')
+echo "Starting on URLs:"
+echo "https://$cf_url1"
+echo "https://$cf_url2"
 echo "============================="
 
 
